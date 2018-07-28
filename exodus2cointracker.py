@@ -30,7 +30,7 @@ def load_txs(exodus_folder):
 def shorten(amt):
     """Shorten amount value to reduce rounding erros"""
     val, coin = amt.split(' ')
-    return val[:6] + ' ' + curr
+    return val[:6] + ' ' + coin
 
 
 def determine_exchange(t):
