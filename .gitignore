@@ -1,3 +1,4 @@
 exodus-report-SAFE-*/
 cointracker_output.csv
-
+__pycache__/
+.ipynb_checkpoints/

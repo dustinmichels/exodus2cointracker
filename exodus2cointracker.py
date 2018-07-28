@@ -27,18 +27,43 @@ def load_txs(exodus_folder):
     return txs
 
 
+def shorten(amt):
+    """Shorten amount value to reduce rounding erros"""
+    val, coin = amt.split(' ')
+    return val[:6] + ' ' + curr
+
+
+def determine_exchange(t):
+    """If this transaction is an exchange, return
+    (amount/coin sent, amount/coin recieved). Else, None."""
+
+    coin_amt = t.get('coinAmount')
+
+    to_coin = t.get('toCoin')
+    if to_coin:
+        to_coin_amt = to_coin.get('coinAmount')
+        return_tuple = coin_amt[1:], to_coin_amt
+        return tuple(shorten(t) for t in return_tuple)
+
+    from_coin = t.get('fromCoin')
+    if from_coin:
+        from_coin_amt = from_coin.get('coinAmount')
+        return_tuple = from_coin_amt, coin_amt
+        return tuple(shorten(t) for t in return_tuple)
+
+    return None
+
+
 def remove_duplicates(all_txs):
-    """If two transactions share a shapeshiftOrderId, removes the second"""
-    ids = set()
+    """Remove double entry of trades"""
+    exchanges = set()
     txs = all_txs[:]
-    remove_txs = []
     for tx in all_txs:
-        order_id = tx.get('meta').get('shapeshiftOrderId')
-        if order_id in ids:
-            remove_txs.append(tx)
-        if order_id:
-            ids.add(order_id)
-    [txs.remove(t) for t in remove_txs]  # remove each item in remove_txs from txs
+        exchange = determine_exchange(tx)
+        if exchange in exchanges:
+            txs.remove(tx)
+        if exchange:
+            exchanges.add(exchange)
     return txs
 
 
